@@ -31,7 +31,7 @@ Usage:
 Keys: → = YES, ← = NO, SPACE = start the next block, ESC = quit (asks first).
 Every trial is saved the moment it ends, to my_data/Visual_Mooney_Experiment_<Name>_<date>_<time>.csv
 (or Audio_SineWaveSpeech_Experiment_...), so closing the window loses nothing. At the end the file
-is uploaded to the class data repository with the student's GitHub login (see class_repo.py).
+is uploaded to class_data/ in the class repository with the student's GitHub login (class_repo.py).
 """
 
 import os
@@ -563,7 +563,7 @@ class MooneyGUI:
                 status.config(fg='red', text=f"Not uploaded: {failed[0][1]}\n\nYour data are safe on this "
                                              "computer. When you are online, run:  python upload_data.py")
             else:
-                status.config(fg='green', text=f"Uploaded to GitHub: {class_repo.DATA_REPO}/"
+                status.config(fg='green', text=f"Uploaded to GitHub: {class_repo.REPO}/"
                                                f"{class_repo.destination(self.task.data_path)}")
             close.config(state='normal')
 

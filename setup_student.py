@@ -7,7 +7,7 @@ One-time setup before the first class (about 5 minutes):
 1. Installs the Python packages the task needs.
 2. Checks that pictures and sound work.
 3. Signs you in to GitHub in your browser (once; it is remembered).
-4. Accepts your invitation to the class data repository.
+4. Accepts your invitation to the class repository on GitHub.
 5. Saves your name, so both sessions use the same one.
 6. Uploads a small check-in file, so you and your instructor know it all works.
 
@@ -79,14 +79,14 @@ def main():
         login = class_repo.github_login()
     print(f"Signed in as {login}")
 
-    step(f"Getting access to {class_repo.DATA_REPO}")
+    step(f"Getting upload access to {class_repo.REPO}")
     if not class_repo.can_push():
         if class_repo.accept_invitation():
             print("Accepted your invitation.")
         if not class_repo.can_push():
             fail(f"You have not been invited yet. Send your GitHub username, {login}, to your instructor, "
                  "and run this again once they say you were added.")
-    print("OK: you can upload to the class data repository")
+    print("OK: you can upload your data")
 
     step("Your name")
     saved = class_repo.load_student().get('name', '')
@@ -99,8 +99,9 @@ def main():
     step("Uploading a check-in file")
     note = {'name': name, 'github': login, 'python': platform.python_version(),
             'system': f"{platform.system()} {platform.release()}", 'checked_in': datetime.now().isoformat()}
-    class_repo.put_file(f"checkins/{login}.json", json.dumps(note, indent=2).encode(), f"Check in {login}")
-    print(f"OK: {class_repo.DATA_REPO}/checkins/{login}.json")
+    dest = f"{class_repo.CLASS_DATA}/checkins/{login}.json"
+    class_repo.put_file(dest, json.dumps(note, indent=2).encode(), f"Check in {login}")
+    print(f"OK: {class_repo.REPO}/{dest}")
 
     print("\nAll set. In class, open a terminal in this folder and run:\n"
           f"    {'py' if platform.system() == 'Windows' else 'python3'} mooney_prediction_task_blocks.py")

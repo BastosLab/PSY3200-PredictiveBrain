@@ -23,7 +23,7 @@ def main():
         return
     done, failed = class_repo.upload_pending(Path(args.data_dir))
     for dest in done:
-        print(f"Uploaded {class_repo.DATA_REPO}/{dest}")
+        print(f"Uploaded {class_repo.REPO}/{dest}")
     for name, error in failed:
         print(f"NOT uploaded {name}: {error}")
     sys.exit(1 if failed else 0)

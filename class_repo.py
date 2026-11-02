@@ -1,10 +1,16 @@
 """
-The class data repository on GitHub, used through the GitHub CLI (`gh`) with each
-student's own login, so every upload is credited to the student's GitHub account.
+Uploading session files to class_data/ in the class repository on GitHub, through the
+GitHub CLI (`gh`) with each student's own login, so every upload is credited to the
+student's GitHub account.
 
-Session files go to <modality>/ (full sessions) or demo/<modality>/ (shortened test
-runs, which the class analysis skips). A file counts as uploaded once the repository
-has it with the same content, so uploading again never duplicates anything.
+The main branch only accepts changes through pull requests, and changes to the task code
+need approval from a code owner (.github/CODEOWNERS). class_data/ has no code owner, so an
+upload is a pull request that merges at once: branch -> add the file -> pull request ->
+merge -> delete the branch.
+
+Files go to class_data/<modality>/ (full sessions) or class_data/demo/<modality>/
+(shortened test runs, which the class analysis skips). A file counts as uploaded once
+main has it with the same content, so uploading again never duplicates anything.
 """
 import base64
 import csv
@@ -19,7 +25,8 @@ import unicodedata
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-DATA_REPO = 'BastosLab/PSY3200-PredictiveBrain-data'
+REPO = 'BastosLab/PSY3200-PredictiveBrain'
+CLASS_DATA = 'class_data'                               # folder in the repository
 DATA_DIR = Path(__file__).resolve().parent / 'my_data'
 STUDENT_FILE = Path.home() / '.psy3200_student.json'   # name and GitHub login, saved by setup_student.py
 UPLOAD_LOG = '.uploaded'                                # in the data folder: one uploaded file name per line
@@ -62,6 +69,13 @@ def gh(*args: str, input_text: Optional[str] = None, timeout: float = 60) -> str
     return r.stdout
 
 
+def api(method: str, path: str, body: Optional[dict] = None):
+    """One GitHub REST call; returns the parsed JSON answer."""
+    args = ['api', '--method', method, path]
+    out = gh(*args, '--input', '-', input_text=json.dumps(body)) if body is not None else gh(*args)
+    return json.loads(out) if out.strip() else {}
+
+
 def github_login() -> str:
     try:
         return gh('api', 'user', '--jq', '.login').strip()
@@ -70,18 +84,17 @@ def github_login() -> str:
 
 
 def accept_invitation() -> bool:
-    """Accept a pending invitation to the data repository. True if there was one."""
-    invitations = json.loads(gh('api', 'user/repository_invitations') or '[]')
-    for inv in invitations:
-        if inv['repository']['full_name'].lower() == DATA_REPO.lower():
-            gh('api', '--method', 'PATCH', f"user/repository_invitations/{inv['id']}")
+    """Accept a pending invitation to the class repository. True if there was one."""
+    for inv in api('GET', 'user/repository_invitations'):
+        if inv['repository']['full_name'].lower() == REPO.lower():
+            api('PATCH', f"user/repository_invitations/{inv['id']}")
             return True
     return False
 
 
 def can_push() -> bool:
     try:
-        return gh('api', f'repos/{DATA_REPO}', '--jq', '.permissions.push').strip() == 'true'
+        return gh('api', f'repos/{REPO}', '--jq', '.permissions.push').strip() == 'true'
     except UploadError:
         return False
 
@@ -92,39 +105,68 @@ def blob_sha(data: bytes) -> str:
     return hashlib.sha1(b'blob %d\0' % len(data) + data).hexdigest()
 
 
-def remote_sha(dest: str) -> Optional[str]:
+def remote_sha(dest: str, ref: str = 'main') -> Optional[str]:
     try:
-        return gh('api', f'repos/{DATA_REPO}/contents/{dest}', '--jq', '.sha').strip()
+        return gh('api', f'repos/{REPO}/contents/{dest}?ref={ref}', '--jq', '.sha').strip()
     except UploadError as e:
         if 'HTTP 404' in str(e):
             return None
         raise
 
 
-def put_file(dest: str, data: bytes, message: str, attempts: int = 6) -> None:
-    """Create or update dest in the data repository. Retries when many students upload at once."""
+def retry(call, attempts: int = 6, retry_on: str = r'HTTP (405|409|5\d\d)'):
+    """Retry when many students upload at the same moment (or GitHub is still checking a merge)."""
     for attempt in range(attempts):
-        sha = remote_sha(dest)
-        if sha == blob_sha(data):
-            return
-        body = {'message': message, 'content': base64.b64encode(data).decode()}
-        if sha:
-            body['sha'] = sha
         try:
-            gh('api', '--method', 'PUT', f'repos/{DATA_REPO}/contents/{dest}', '--input', '-',
-               input_text=json.dumps(body))
-            return
+            return call()
         except UploadError as e:
-            if 'HTTP 404' in str(e):
-                raise UploadError(f"No access to {DATA_REPO}. Run setup_student.py (it accepts your "
-                                  "invitation), or ask your instructor to invite your GitHub username.")
-            if attempt == attempts - 1 or not re.search(r'HTTP (409|422|5\d\d)', str(e)):
+            if attempt == attempts - 1 or not re.search(retry_on, str(e)):
                 raise
         time.sleep((1 + random.random()) * (attempt + 1))
 
 
+def put_file(dest: str, data: bytes, message: str) -> None:
+    """Add or update dest on main with a pull request that is merged at once."""
+    if remote_sha(dest) == blob_sha(data):
+        return
+    branch = f"upload/{github_login()}/{Path(dest).stem}"
+
+    main = api('GET', f'repos/{REPO}/git/ref/heads/main')['object']['sha']
+    try:
+        api('POST', f'repos/{REPO}/git/refs', {'ref': f'refs/heads/{branch}', 'sha': main})
+    except UploadError as e:
+        if re.search(r'HTTP 40[34]', str(e)):
+            raise UploadError(f"No permission to upload to {REPO}. Run setup_student.py (it accepts your "
+                              "invitation), or ask your instructor to invite your GitHub username.")
+        if 'HTTP 422' not in str(e):            # 422: the branch is left over from an earlier try
+            raise
+
+    sha = remote_sha(dest, ref=branch)
+    if sha != blob_sha(data):
+        body = {'message': message, 'content': base64.b64encode(data).decode(), 'branch': branch}
+        if sha:
+            body['sha'] = sha
+        api('PUT', f'repos/{REPO}/contents/{dest}', body)
+
+    try:
+        number = api('POST', f'repos/{REPO}/pulls', {'title': message, 'head': branch, 'base': 'main',
+                                                       'body': 'Uploaded by the task (class_repo.py).'})['number']
+    except UploadError as e:                     # 422: a pull request for this branch is already open
+        if 'HTTP 422' not in str(e):
+            raise
+        open_prs = api('GET', f"repos/{REPO}/pulls?head={REPO.split('/')[0]}:{branch}&state=open")
+        if not open_prs:
+            raise
+        number = open_prs[0]['number']
+    retry(lambda: api('PUT', f'repos/{REPO}/pulls/{number}/merge', {'merge_method': 'squash'}))
+    try:
+        api('DELETE', f'repos/{REPO}/git/refs/heads/{branch}')
+    except UploadError:
+        pass                                     # only tidying up
+
+
 def destination(path: Path) -> str:
-    """visual/<file> for a class session; demo/visual/<file> for a shortened test run."""
+    """class_data/visual/<file> for a class session; class_data/demo/visual/<file> for a test run."""
     with open(path, newline='') as f:
         rows = list(csv.DictReader(f))
     if not rows:
@@ -132,7 +174,7 @@ def destination(path: Path) -> str:
     block1 = [r['trial_type'] for r in rows if r['block'] == '1']
     full = (rows[0]['n_blocks'] == str(FULL_BLOCKS)
             and ('reveal' not in block1 or block1.count('pre') == FULL_PRE_TRIALS))
-    return f"{'' if full else 'demo/'}{rows[0]['modality']}/{path.name}"
+    return f"{CLASS_DATA}/{'' if full else 'demo/'}{rows[0]['modality']}/{path.name}"
 
 
 def upload(path: Path) -> str:
@@ -140,9 +182,8 @@ def upload(path: Path) -> str:
     path = Path(path)
     dest = destination(path)
     put_file(dest, path.read_bytes(), f"Add {path.name}")
-    log = path.parent / UPLOAD_LOG
     if path.name not in uploaded_names(path.parent):
-        with open(log, 'a') as f:
+        with open(path.parent / UPLOAD_LOG, 'a') as f:
             f.write(path.name + '\n')
     return dest
 
