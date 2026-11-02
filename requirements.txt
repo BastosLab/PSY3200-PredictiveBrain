@@ -1,0 +1,10 @@
+# running the task
+numpy
+pillow
+pygame-ce
+# analysis
+pandas
+scipy
+matplotlib
+# tests
+pytest
