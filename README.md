@@ -80,10 +80,11 @@ the last screen says *Uploaded to GitHub* before you close the window.
   `Visual_Mooney_Experiment_JaneDoe_2026-11-10_14-05-31.csv` (audio:
   `Audio_SineWaveSpeech_Experiment_...`). Each trial is saved the moment it
   ends, so nothing is lost if the window closes or the computer crashes.
-- **On GitHub:** in this repository's
-  [`class_data/`](https://github.com/BastosLab/PSY3200-PredictiveBrain/tree/main/class_data)
-  folder (`visual/` or `audio/`), uploaded under your GitHub account. This
-  repository is public, so anyone can see the file, which has your name in it.
+- **On GitHub:** on this repository's
+  [`class-data` branch](https://github.com/BastosLab/PSY3200-PredictiveBrain/tree/class-data/class_data),
+  in `class_data/visual/` or `class_data/audio/`, uploaded under your GitHub
+  account. This repository is public, so anyone can see the file, which has
+  your name in it.
 - **Upload failed** (for example, no internet)? Your file is safe. Run this
   later; it uploads anything that is not on GitHub yet:
 
@@ -105,12 +106,11 @@ Your own session:
 python3 analysis/analyze_session.py my_data/Visual_Mooney_Experiment_JaneDoe_2026-11-10_14-05-31.csv
 ```
 
-The whole class: get everyone's latest data by downloading this repository
-again (**Code → Download ZIP**; or `git pull` if you cloned it), then, in that
-folder:
+The whole class (this first downloads everyone's latest data from GitHub into
+`class_data/`):
 
 ```bash
-python3 analysis/analyze_class.py class_data/
+python3 analysis/analyze_class.py --download
 ```
 
 After the first class this tests the visual effect. After the second class it
@@ -141,7 +141,8 @@ python3 analysis/analyze_class.py data/simulated/
 ## Found a bug? Propose a fix
 
 Anyone can propose a change; André or Ishan must approve changes to the code
-before they go in (your data uploads need no approval). Make the change on a new
+before they go in (your data uploads go to the `class-data` branch and need no
+approval). Make the change on a new
 branch (or in a fork, if you are not in the class), check that
 `python3 -m pytest tests/` still passes, and open a pull request saying what was
 wrong and how you checked the fix.
@@ -151,16 +152,15 @@ wrong and how you checked the fix.
 - **Adding students:** collect GitHub usernames, then
   `python3 tools/invite_students.py usernames.txt` (one per line) gives each
   write access to this repository. `python3 tools/invite_students.py --status`
-  lists who has finished setup (their check-in file in `class_data/checkins/`)
-  and who has not accepted yet.
-- **Who can change what:** `main` accepts changes only through pull requests and
-  cannot be force-pushed or deleted. Code changes need approval from a code
-  owner (`.github/CODEOWNERS`: André, Ishan); `class_data/` has no code owner, so
-  the task's uploads (a pull request per file) merge at once. André and Ishan
-  can push to `main` directly.
+  lists who has finished setup (their check-in file in `class_data/checkins/` on
+  the `class-data` branch) and who has not accepted yet.
+- **Who can change what:** `main` (the task) accepts changes only through pull
+  requests approved by a code owner (`.github/CODEOWNERS`: André, Ishan), who
+  can also push to it directly. The `class-data` branch (the data) takes the
+  students' uploads directly. Neither branch can be force-pushed or deleted.
 - **Test runs:** a shortened run such as
   `python3 mooney_prediction_task_blocks.py --blocks 2` uploads to
-  `class_data/demo/`, which the class analysis skips. Add `--no-upload` to keep
+  `class_data/demo/` on the `class-data` branch, which the class analysis skips. Add `--no-upload` to keep
   it on your computer only. `--autopilot` runs are never uploaded.
 - Uploads use each student's own GitHub CLI login (`class_repo.py`), so every
   file is credited to the student's account. Concurrent uploads retry.

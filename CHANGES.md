@@ -67,9 +67,10 @@ numbers refer to the original `mooney_prediction_task_blocks.py` (commit `cadeab
   `~/mooney_data/mooney_<ID>_<modality>_...`). The start screen asks for the
   student's name instead of a participant ID.
 - Automatic upload: at the end of each session the file goes to `class_data/`
-  in this repository, with the student's own GitHub CLI login (`class_repo.py`),
-  as a pull request that merges at once; failed uploads are retried by the next
-  session or by `upload_data.py`. `setup_student.py` does the one-time setup;
+  on the `class-data` branch of this repository, with the student's own GitHub
+  CLI login (`class_repo.py`); failed uploads are retried by the next session or
+  by `upload_data.py`. `analysis/analyze_class.py --download` fetches everyone's
+  latest data before analysing. `setup_student.py` does the one-time setup;
   `tools/invite_students.py` adds students and shows who has checked in.
 
 - Command-line options: `--participant/--modality` (skip the menu), `--blocks`,
