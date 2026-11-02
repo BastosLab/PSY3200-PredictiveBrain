@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'analysis'))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from analyze_class import analyze  # noqa: E402
+from class_repo import FILE_PREFIX  # noqa: E402
 from check_csv import check_complete, read  # noqa: E402
 from common import effects  # noqa: E402
 from simulate_class_data import PROBS, make_task, simulate_class  # noqa: E402
@@ -30,7 +31,7 @@ def task():
 def simulated(tmp_path_factory, task):
     folder = tmp_path_factory.mktemp('sim')
     for pid, mod, df in simulate_class(n=20, seed=1, task=task):
-        df.to_csv(folder / f"mooney_{pid}_{mod}_simulated.csv", index=False)
+        df.to_csv(folder / f"{FILE_PREFIX[mod]}_{pid}_simulated.csv", index=False)
     return folder
 
 
@@ -67,13 +68,13 @@ def test_null_false_positive_rate(task):
 def test_skips_demo_incomplete_and_duplicates(simulated, tmp_path):
     folder = tmp_path / 'class'
     (folder / 'demo').mkdir(parents=True)
-    files = sorted(simulated.glob('*_visual_*.csv'))[:3]
+    files = sorted(simulated.glob('Visual_*.csv'))[:3]
     for f in files:
         (folder / f.name).write_text(f.read_text())
     lines = files[0].read_text().splitlines()
-    (folder / 'mooney_S99_visual_partial.csv').write_text('\n'.join(lines[:100]) + '\n')     # quit early
+    (folder / 'Visual_Mooney_Experiment_S99_partial.csv').write_text('\n'.join(lines[:100]) + '\n')     # quit early
     (folder / 'demo' / files[1].name).write_text(files[1].read_text())
-    (folder / 'mooney_S01_visual_again.csv').write_text(files[0].read_text())               # duplicate
+    (folder / 'Visual_Mooney_Experiment_S01_again.csv').write_text(files[0].read_text())               # duplicate
     table, _ = analyze(folder, tmp_path / 'out', quiet=True)
     assert len(table) == 3
     text = (tmp_path / 'out' / 'stats.txt').read_text()
@@ -84,7 +85,7 @@ def test_after_first_class(simulated, tmp_path):
     """First class: everyone did visual; nobody has audio yet."""
     folder = tmp_path / 'class1'
     folder.mkdir()
-    for f in simulated.glob('*_visual_*.csv'):
+    for f in simulated.glob('Visual_*.csv'):
         (folder / f.name).write_text(f.read_text())
     table, results = analyze(folder, tmp_path / 'out', quiet=True)
     assert (table.modality == 'visual').sum() == 20 and len(table) == 20
@@ -101,7 +102,7 @@ def test_scripts_run_from_command_line(tmp_path):
     run(str(ROOT / 'analysis' / 'simulate_class_data.py'), '--n', '4', '--out', str(tmp_path / 'data'))
     out = run(str(ROOT / 'analysis' / 'analyze_class.py'), str(tmp_path / 'data'), '--out', str(tmp_path / 'res'))
     assert 'disambiguation effect' in out.stdout
-    f = next((tmp_path / 'data').glob('*_visual_*.csv'))
+    f = next((tmp_path / 'data').glob('Visual_*.csv'))
     out = run(str(ROOT / 'analysis' / 'analyze_session.py'), str(f), '--out', str(tmp_path / 'res'))
     assert 'Targets went from' in out.stdout
     assert (tmp_path / 'res' / f.stem / 'fig_session.png').exists()

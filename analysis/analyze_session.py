@@ -2,7 +2,7 @@
 """
 Analyse one session (your own data).
 
-    python analysis/analyze_session.py ~/mooney_data/mooney_P01_visual_20261110_101500.csv
+    python analysis/analyze_session.py my_data/Visual_Mooney_Experiment_JaneDoe_2026-11-10_10-15-00.csv
 
 Writes results/<file name>/summary.csv and fig_session.png, and prints a summary.
 """

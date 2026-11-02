@@ -28,6 +28,7 @@ import pandas as pd
 from scipy.special import expit, logit
 
 from common import ROOT
+from class_repo import FILE_PREFIX
 from mooney_prediction_task_blocks import FIELDNAMES, N_ITEMS, MooneyPredictionTask
 
 PROBS = {'visual': dict(pre=0.20, post_control=0.30, post_target=0.85, revealed=0.85),
@@ -109,7 +110,7 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for pid, mod, df in simulate_class(args.n, args.seed, args.null):
-        df.to_csv(out / f"mooney_{pid}_{mod}_simulated.csv", index=False)
+        df.to_csv(out / f"{FILE_PREFIX[mod]}_{pid}_simulated.csv", index=False)
     print(f"Wrote {2 * args.n} files to {out}" + (" (null: no effect)" if args.null else ""))
 
 
