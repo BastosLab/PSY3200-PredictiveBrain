@@ -1,32 +1,31 @@
 """
-Uploading session files to class_data/ in the class repository on GitHub, through the
-GitHub CLI (`gh`) with each student's own login, so every upload is credited to the
-student's GitHub account.
+Uploading session files to the class repository on GitHub, through the GitHub CLI (`gh`)
+with each student's own login, so every upload is credited to the student's GitHub account.
 
-The main branch only accepts changes through pull requests, and changes to the task code
-need approval from a code owner (.github/CODEOWNERS). class_data/ has no code owner, so an
-upload is a pull request that merges at once: branch -> add the file -> pull request ->
-merge -> delete the branch.
-
-Files go to class_data/<modality>/ (full sessions) or class_data/demo/<modality>/
-(shortened test runs, which the class analysis skips). A file counts as uploaded once
-main has it with the same content, so uploading again never duplicates anything.
+The task code is on `main`, where changes need a code owner's approval. The data are on the
+`class-data` branch of the same repository, which students push to directly (it cannot be
+deleted or force-pushed): class_data/<modality>/ for full sessions, class_data/demo/<modality>/
+for shortened test runs (the class analysis skips them). A file counts as uploaded once the
+branch has it with the same content, so uploading again never duplicates anything.
 """
 import base64
 import csv
 import hashlib
+import io
 import json
 import random
 import re
 import shutil
 import subprocess
+import tarfile
 import time
 import unicodedata
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 REPO = 'BastosLab/PSY3200-PredictiveBrain'
-CLASS_DATA = 'class_data'                               # folder in the repository
+DATA_BRANCH = 'class-data'                              # branch that holds the data
+CLASS_DATA = 'class_data'                               # folder on that branch
 DATA_DIR = Path(__file__).resolve().parent / 'my_data'
 STUDENT_FILE = Path.home() / '.psy3200_student.json'   # name and GitHub login, saved by setup_student.py
 UPLOAD_LOG = '.uploaded'                                # in the data folder: one uploaded file name per line
@@ -105,7 +104,7 @@ def blob_sha(data: bytes) -> str:
     return hashlib.sha1(b'blob %d\0' % len(data) + data).hexdigest()
 
 
-def remote_sha(dest: str, ref: str = 'main') -> Optional[str]:
+def remote_sha(dest: str, ref: str = DATA_BRANCH) -> Optional[str]:
     try:
         return gh('api', f'repos/{REPO}/contents/{dest}?ref={ref}', '--jq', '.sha').strip()
     except UploadError as e:
@@ -114,55 +113,46 @@ def remote_sha(dest: str, ref: str = 'main') -> Optional[str]:
         raise
 
 
-def retry(call, attempts: int = 6, retry_on: str = r'HTTP (405|409|5\d\d)'):
-    """Retry when many students upload at the same moment (or GitHub is still checking a merge)."""
+def put_file(dest: str, data: bytes, message: str, attempts: int = 6) -> None:
+    """Create or update dest on the class-data branch. Retries when many students upload at once."""
     for attempt in range(attempts):
+        sha = remote_sha(dest)
+        if sha == blob_sha(data):
+            return
+        body = {'message': message, 'content': base64.b64encode(data).decode(), 'branch': DATA_BRANCH}
+        if sha:
+            body['sha'] = sha
         try:
-            return call()
+            api('PUT', f'repos/{REPO}/contents/{dest}', body)
+            return
         except UploadError as e:
-            if attempt == attempts - 1 or not re.search(retry_on, str(e)):
+            if re.search(r'HTTP 40[34]', str(e)):
+                raise UploadError(f"No permission to upload to {REPO}. Run setup_student.py (it accepts your "
+                                  "invitation), or ask your instructor to invite your GitHub username.")
+            if attempt == attempts - 1 or not re.search(r'HTTP (409|422|5\d\d)', str(e)):
                 raise
         time.sleep((1 + random.random()) * (attempt + 1))
 
 
-def put_file(dest: str, data: bytes, message: str) -> None:
-    """Add or update dest on main with a pull request that is merged at once."""
-    if remote_sha(dest) == blob_sha(data):
-        return
-    branch = f"upload/{github_login()}/{Path(dest).stem}"
-
-    main = api('GET', f'repos/{REPO}/git/ref/heads/main')['object']['sha']
-    try:
-        api('POST', f'repos/{REPO}/git/refs', {'ref': f'refs/heads/{branch}', 'sha': main})
-    except UploadError as e:
-        if re.search(r'HTTP 40[34]', str(e)):
-            raise UploadError(f"No permission to upload to {REPO}. Run setup_student.py (it accepts your "
-                              "invitation), or ask your instructor to invite your GitHub username.")
-        if 'HTTP 422' not in str(e):            # 422: the branch is left over from an earlier try
-            raise
-
-    sha = remote_sha(dest, ref=branch)
-    if sha != blob_sha(data):
-        body = {'message': message, 'content': base64.b64encode(data).decode(), 'branch': branch}
-        if sha:
-            body['sha'] = sha
-        api('PUT', f'repos/{REPO}/contents/{dest}', body)
-
-    try:
-        number = api('POST', f'repos/{REPO}/pulls', {'title': message, 'head': branch, 'base': 'main',
-                                                       'body': 'Uploaded by the task (class_repo.py).'})['number']
-    except UploadError as e:                     # 422: a pull request for this branch is already open
-        if 'HTTP 422' not in str(e):
-            raise
-        open_prs = api('GET', f"repos/{REPO}/pulls?head={REPO.split('/')[0]}:{branch}&state=open")
-        if not open_prs:
-            raise
-        number = open_prs[0]['number']
-    retry(lambda: api('PUT', f'repos/{REPO}/pulls/{number}/merge', {'merge_method': 'squash'}))
-    try:
-        api('DELETE', f'repos/{REPO}/git/refs/heads/{branch}')
-    except UploadError:
-        pass                                     # only tidying up
+def download_class_data(dest: Path) -> Path:
+    """Copy everyone's latest files from the class-data branch into dest (replacing what was there)."""
+    exe = shutil.which('gh')
+    if exe is None:
+        raise UploadError("The GitHub CLI (gh) is not installed. See 'Before the first class' in the README.")
+    r = subprocess.run([exe, 'api', f'repos/{REPO}/tarball/{DATA_BRANCH}'], capture_output=True, timeout=300)
+    if r.returncode != 0:
+        raise UploadError(r.stderr.decode(errors='replace').strip() or "download failed")
+    dest = Path(dest)
+    if dest.exists():
+        shutil.rmtree(dest)
+    with tarfile.open(fileobj=io.BytesIO(r.stdout)) as tar:
+        for member in tar.getmembers():
+            parts = Path(member.name).parts      # <repo>-<commit>/class_data/visual/<file>
+            if member.isfile() and len(parts) > 2 and parts[1] == CLASS_DATA and '..' not in parts:
+                target = dest.joinpath(*parts[2:])
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(tar.extractfile(member).read())
+    return dest
 
 
 def destination(path: Path) -> str:

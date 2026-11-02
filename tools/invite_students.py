@@ -15,12 +15,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from class_repo import CLASS_DATA, REPO, UploadError, gh  # noqa: E402
+from class_repo import CLASS_DATA, DATA_BRANCH, REPO, UploadError, gh  # noqa: E402
 
 
 def status():
     try:
-        checkins = json.loads(gh('api', f'repos/{REPO}/contents/{CLASS_DATA}/checkins'))
+        checkins = json.loads(gh('api', f'repos/{REPO}/contents/{CLASS_DATA}/checkins?ref={DATA_BRANCH}'))
     except UploadError:
         checkins = []
     names = [c['name'][:-5] for c in checkins if c['name'].endswith('.json')]

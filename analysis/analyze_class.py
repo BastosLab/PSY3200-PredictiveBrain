@@ -2,7 +2,8 @@
 """
 Analyse the whole class: every session file in a folder.
 
-    python analysis/analyze_class.py class_data/
+    python analysis/analyze_class.py --download     # fetch everyone's latest data from GitHub first
+    python analysis/analyze_class.py class_data/    # or analyse a folder you already have
 
 Skips anything in a demo/ subfolder and incomplete (quit or crashed) sessions,
 listing them. Writes to results/class/:
@@ -14,6 +15,7 @@ listing them. Writes to results/class/:
     mixed_model.txt         optional, only if statsmodels is installed
 """
 import argparse
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -301,9 +303,19 @@ def analyze(folder, out, seed=0, quiet=False):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('folder')
+    ap.add_argument('folder', nargs='?', help="folder of session files (default with --download: class_data/)")
+    ap.add_argument('--download', action='store_true',
+                    help="first fetch everyone's latest data from GitHub into the folder")
     ap.add_argument('--out', default=str(ROOT / 'results' / 'class'))
     args = ap.parse_args()
+    if args.download:
+        sys.path.insert(0, str(ROOT))
+        import class_repo
+        folder = class_repo.download_class_data(Path(args.folder or ROOT / class_repo.CLASS_DATA))
+        print(f"Downloaded the latest class data into {folder}\n")
+        args.folder = folder
+    elif not args.folder:
+        ap.error("give a folder, or --download")
     analyze(args.folder, args.out)
 
 
