@@ -24,20 +24,23 @@ Install: pip install pillow numpy pygame-ce
 
 Usage:
     python mooney_prediction_task_blocks.py
-    python mooney_prediction_task_blocks.py --participant P01 --modality visual
+    python mooney_prediction_task_blocks.py --participant "Jane Doe" --modality visual
+    python mooney_prediction_task_blocks.py --blocks 2 --no-upload                    # quick local test
     python mooney_prediction_task_blocks.py --autopilot --speed 50 --modality audio   # testing
 
-Keys: → = YES, ← = NO, SPACE = continue, ESC = quit (asks first).
-Every trial is saved the moment it ends, so closing the window loses nothing.
+Keys: → = YES, ← = NO, SPACE = start the next block, ESC = quit (asks first).
+Every trial is saved the moment it ends, to my_data/Visual_Mooney_Experiment_<Name>_<date>_<time>.csv
+(or Audio_SineWaveSpeech_Experiment_...), so closing the window loses nothing. At the end the file
+is uploaded to the class data repository with the student's GitHub login (see class_repo.py).
 """
 
 import os
-import re
 import sys
 import csv
 import time
 import random
 import argparse
+import threading
 from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple, Optional
@@ -48,6 +51,9 @@ os.environ.setdefault('PYGAME_HIDE_SUPPORT_PROMPT', '1')
 import pygame
 import tkinter as tk
 from tkinter import messagebox
+
+import class_repo
+from class_repo import DATA_DIR, FILE_PREFIX, clean_name
 
 N_ITEMS = 12                # 12 images and 12 sentences
 IMAGE_SIZE = 300            # pixels on screen
@@ -158,8 +164,8 @@ class MooneyPredictionTask:
     def open_data_file(self) -> None:
         """Create the CSV at the start of the session; each trial is added as it ends."""
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.data_path = self.data_dir / f"mooney_{self.participant_id}_{self.modality}_{timestamp}.csv"
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.data_path = self.data_dir / f"{FILE_PREFIX[self.modality]}_{self.participant_id}_{timestamp}.csv"
         self.data_file = open(self.data_path, 'w', newline='')
         self.writer = csv.DictWriter(self.data_file, fieldnames=FIELDNAMES)
         self.writer.writeheader()
@@ -210,9 +216,11 @@ class MooneyPredictionTask:
 class MooneyGUI:
     """GUI for block-based Mooney task."""
 
-    def __init__(self, task: MooneyPredictionTask, autopilot: bool = False, speed: float = 1.0):
+    def __init__(self, task: MooneyPredictionTask, autopilot: bool = False, speed: float = 1.0,
+                 upload: bool = False):
         self.task = task
         self.autopilot = autopilot
+        self.upload = upload and not autopilot      # autopilot runs are never uploaded
         self.speed = speed if autopilot else 1.0
         self.auto_rng = random.Random()
         self.root = tk.Tk()
@@ -269,11 +277,12 @@ class MooneyGUI:
         frame.pack(expand=True, fill='both')
 
         tk.Label(
-            frame, text="Enter Participant ID:",
+            frame, text="Your name (first and last):",
             font=("Helvetica", 14), bg='white', fg='black'
         ).pack(pady=20)
 
-        entry = tk.Entry(frame, font=("Helvetica", 12), width=20)
+        entry = tk.Entry(frame, font=("Helvetica", 12), width=24)
+        entry.insert(0, class_repo.load_student().get('name', ''))     # saved by setup or the last session
         entry.pack(pady=10)
         entry.focus()
 
@@ -282,11 +291,13 @@ class MooneyGUI:
         entry.bind('<Return>', lambda e: start())
 
     def begin_session(self, participant_id: str, modality: str) -> None:
-        # Only letters, digits, - and _ (the ID becomes part of the file name)
-        pid = re.sub(r'[^A-Za-z0-9_-]', '', participant_id)
+        # 'Jane Doe' -> 'JaneDoe' (the name becomes part of the file name)
+        pid = clean_name(participant_id)
         if not pid:
-            messagebox.showwarning("Error", "Please enter a participant ID (letters, numbers, - or _)")
+            messagebox.showwarning("Error", "Please enter your name")
             return
+        if not self.autopilot:
+            class_repo.save_student(name=participant_id.strip())       # pre-filled next time
         self.task.participant_id = pid
         self.task.modality = modality
         self.task.session_data = []
@@ -518,9 +529,45 @@ class MooneyGUI:
             font=("Helvetica", 11), bg='white', fg='gray'
         ).pack(pady=20)
 
-        tk.Button(frame, text="Close", command=self.root.destroy, width=12, bg='lightcoral', activebackground='salmon').pack(pady=20)
+        status = tk.Label(frame, text="", font=("Helvetica", 11), bg='white', wraplength=560)
+        status.pack(pady=10)
+        close = tk.Button(frame, text="Close", command=self.root.destroy, width=12, bg='lightcoral',
+                          activebackground='salmon')
+        close.pack(pady=20)
+        if self.upload:
+            self.start_upload(status, close)
         if self.autopilot:
             self.root.after(300, self.root.destroy)
+
+    def start_upload(self, status: tk.Label, close: tk.Button) -> None:
+        """Upload this session (and any earlier one that failed) without freezing the window."""
+        status.config(text="Uploading your data to GitHub...", fg='black')
+        close.config(state='disabled')
+        result = {}
+
+        def work():
+            try:
+                result['r'] = class_repo.upload_pending(self.task.data_dir)
+            except Exception as e:                  # anything unexpected: report it, keep the data
+                result['r'] = ([], [(self.task.data_path.name, str(e))])
+
+        thread = threading.Thread(target=work, daemon=True)
+        thread.start()
+
+        def check():
+            if thread.is_alive():
+                self.root.after(200, check)
+                return
+            done, failed = result['r']
+            if failed:
+                status.config(fg='red', text=f"Not uploaded: {failed[0][1]}\n\nYour data are safe on this "
+                                             "computer. When you are online, run:  python upload_data.py")
+            else:
+                status.config(fg='green', text=f"Uploaded to GitHub: {class_repo.DATA_REPO}/"
+                                               f"{class_repo.destination(self.task.data_path)}")
+            close.config(state='normal')
+
+        check()
 
     def clear(self) -> None:
         """Clear all widgets."""
@@ -535,12 +582,13 @@ class MooneyGUI:
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Mooney prediction task")
-    parser.add_argument('--participant', help="participant ID (with --modality, skips the menu)")
+    parser.add_argument('--participant', help="your name (with --modality, skips the menu)")
     parser.add_argument('--modality', choices=['visual', 'audio'])
     parser.add_argument('--blocks', type=int, default=10, help="number of blocks (default 10)")
     parser.add_argument('--target-reps', type=int, default=8, help="target trials per phase (default 8)")
     parser.add_argument('--filler-reps', type=int, default=4, help="trials per filler per phase (default 4)")
-    parser.add_argument('--data-dir', default=str(Path.home() / "mooney_data"))
+    parser.add_argument('--data-dir', default=str(DATA_DIR), help="where to save (default: my_data/)")
+    parser.add_argument('--no-upload', action='store_true', help="keep the data on this computer only")
     parser.add_argument('--seed', type=int, help="fix the random order (default: new every session)")
     parser.add_argument('--autopilot', action='store_true', help="answer randomly, for testing")
     parser.add_argument('--speed', type=float, default=1.0, help="autopilot only: run this many times faster")
@@ -553,7 +601,7 @@ def main():
         task = MooneyPredictionTask(script_dir / "stimuli", Path(args.data_dir), n_blocks=args.blocks,
                                     target_reps=args.target_reps, filler_reps=args.filler_reps,
                                     seed=args.seed)
-        gui = MooneyGUI(task, autopilot=args.autopilot, speed=args.speed)
+        gui = MooneyGUI(task, autopilot=args.autopilot, speed=args.speed, upload=not args.no_upload)
         if args.modality and (args.participant or args.autopilot):
             gui.root.after(100, lambda: gui.begin_session(args.participant or 'autopilot', args.modality))
         gui.run()

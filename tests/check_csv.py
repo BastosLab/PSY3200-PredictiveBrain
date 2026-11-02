@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that a session CSV from mooney_prediction_task_blocks.py is complete and consistent.
 
-    python tests/check_csv.py ~/mooney_data/mooney_P01_visual_*.csv
+    python tests/check_csv.py my_data/Visual_Mooney_Experiment_*.csv
 """
 import sys
 from pathlib import Path

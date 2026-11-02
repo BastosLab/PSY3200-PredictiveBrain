@@ -62,6 +62,16 @@ numbers refer to the original `mooney_prediction_task_blocks.py` (commit `cadeab
 
 ## Added
 
+- Data files are named `Visual_Mooney_Experiment_<Name>_<date>_<time>.csv` /
+  `Audio_SineWaveSpeech_Experiment_...` and saved in `my_data/` (was
+  `~/mooney_data/mooney_<ID>_<modality>_...`). The start screen asks for the
+  student's name instead of a participant ID.
+- Automatic upload: at the end of each session the file goes to the private
+  repository `BastosLab/PSY3200-PredictiveBrain-data` with the student's own
+  GitHub CLI login (`class_repo.py`); failed uploads are retried by the next
+  session or by `upload_data.py`. `setup_student.py` does the one-time setup;
+  `tools/invite_students.py` adds students and shows who has checked in.
+
 - Command-line options: `--participant/--modality` (skip the menu), `--blocks`,
   `--target-reps`, `--filler-reps`, `--data-dir`, `--seed`, and `--autopilot
   --speed N` for testing.

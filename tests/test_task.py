@@ -4,6 +4,7 @@ The autopilot tests open a real window (Xvfb on headless Linux) with sound off.
 """
 import os
 import random
+import re
 import shutil
 import signal
 import subprocess
@@ -19,6 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_csv import check_complete, check_rows, read  # noqa: E402
+from class_repo import FILE_PREFIX  # noqa: E402
 from mooney_prediction_task_blocks import MooneyPredictionTask  # noqa: E402
 
 HEADLESS = sys.platform.startswith('linux') and not os.environ.get('DISPLAY')
@@ -61,7 +63,7 @@ def test_autopilot_full_session(tmp_path, modality):
     subprocess.run(task_cmd('--autopilot', '--speed', '50', '--participant', 'AUTO',
                             '--modality', modality, '--data-dir', str(tmp_path)),
                    env=ENV, check=True, timeout=600, capture_output=True)
-    (f,) = tmp_path.glob(f'mooney_AUTO_{modality}_*.csv')
+    (f,) = tmp_path.glob(f"{FILE_PREFIX[modality]}_AUTO_*.csv")
     df = read(f)
     check_complete(df)
     assert len(df) == 490
@@ -72,7 +74,8 @@ def test_short_session_options(tmp_path):
     subprocess.run(task_cmd('--autopilot', '--speed', '50', '--modality', 'visual', '--blocks', '3',
                             '--target-reps', '4', '--filler-reps', '2', '--data-dir', str(tmp_path)),
                    env=ENV, check=True, timeout=300, capture_output=True)
-    (f,) = tmp_path.glob('mooney_autopilot_visual_*.csv')
+    (f,) = tmp_path.glob('Visual_Mooney_Experiment_Autopilot_*.csv')
+    assert re.fullmatch(r'Visual_Mooney_Experiment_Autopilot_\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d\.csv', f.name)
     check_complete(read(f), target_reps=4, filler_reps=2)
 
 
@@ -85,7 +88,7 @@ def test_quit_midway_keeps_data(tmp_path):
     gui.root.after(50, lambda: gui.begin_session('QUIT', 'visual'))
     gui.root.after(1500, lambda: setattr(gui, 'quit_requested', True))
     gui.run()
-    (f,) = tmp_path.glob('mooney_QUIT_*.csv')
+    (f,) = tmp_path.glob('Visual_Mooney_Experiment_QUIT_*.csv')
     df = read(f)
     check_rows(df)
     assert 0 < len(df) < 490 and task.data_file.closed
@@ -97,7 +100,8 @@ def test_break_screen_before_every_block(tmp_path):
     import tkinter as tk
     from mooney_prediction_task_blocks import MooneyGUI
     task = MooneyPredictionTask(ROOT / 'stimuli', tmp_path, n_blocks=3, target_reps=1, filler_reps=1)
-    gui = MooneyGUI(task, autopilot=True, speed=20)
+    gui = MooneyGUI(task, autopilot=True, speed=20, upload=True)
+    assert not gui.upload                       # autopilot runs are never uploaded
     screens, wait = [], gui.wait_for_response
 
     def recording_wait(choices):
@@ -122,7 +126,7 @@ def test_sigkill_keeps_completed_trials(tmp_path):
     deadline = time.time() + 120
     f = None
     while time.time() < deadline:
-        files = list(tmp_path.glob('mooney_KILL_*.csv'))
+        files = list(tmp_path.glob('*_Experiment_KILL_*.csv'))
         if files and len(read(files[0])) >= 10:
             f = files[0]
             break
