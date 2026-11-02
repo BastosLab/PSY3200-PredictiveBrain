@@ -23,7 +23,7 @@ originals in advance ruins the effect for you.
 
 1. **GitHub account.** Make one at [github.com](https://github.com) if you do
    not have one, and send your GitHub username to your instructor, who adds you
-   to the class data repository.
+   to this repository so your data can be uploaded.
 2. **Python 3.12** from [python.org](https://www.python.org/downloads/).
    Windows: in the installer, tick **Add python.exe to PATH**.
 3. **GitHub CLI** from [cli.github.com](https://cli.github.com) (Mac: the
@@ -42,8 +42,8 @@ originals in advance ruins the effect for you.
    (On Windows, type `py` instead of `python3`, here and below.)
 
    This installs the Python packages, checks pictures and sound, signs you in to
-   GitHub in your browser, accepts your invitation to the class data repository,
-   asks your name, and uploads a small check-in file. It ends with **All set**.
+   GitHub in your browser, accepts your invitation to this repository, asks
+   your name, and uploads a small check-in file. It ends with **All set**.
    If it stops, it says why; fix that and run it again.
 
 ## In class
@@ -80,9 +80,10 @@ the last screen says *Uploaded to GitHub* before you close the window.
   `Visual_Mooney_Experiment_JaneDoe_2026-11-10_14-05-31.csv` (audio:
   `Audio_SineWaveSpeech_Experiment_...`). Each trial is saved the moment it
   ends, so nothing is lost if the window closes or the computer crashes.
-- **On GitHub:** in the private class data repository
-  [BastosLab/PSY3200-PredictiveBrain-data](https://github.com/BastosLab/PSY3200-PredictiveBrain-data),
-  folder `visual/` or `audio/`, uploaded under your GitHub account.
+- **On GitHub:** in this repository's
+  [`class_data/`](https://github.com/BastosLab/PSY3200-PredictiveBrain/tree/main/class_data)
+  folder (`visual/` or `audio/`), uploaded under your GitHub account. This
+  repository is public, so anyone can see the file, which has your name in it.
 - **Upload failed** (for example, no internet)? Your file is safe. Run this
   later; it uploads anything that is not on GitHub yet:
 
@@ -104,12 +105,12 @@ Your own session:
 python3 analysis/analyze_session.py my_data/Visual_Mooney_Experiment_JaneDoe_2026-11-10_14-05-31.csv
 ```
 
-The whole class: download the data repository (its **Code → Download ZIP**, or
-`git clone https://github.com/BastosLab/PSY3200-PredictiveBrain-data.git`)
-next to the task folder, then:
+The whole class: get everyone's latest data by downloading this repository
+again (**Code → Download ZIP**; or `git pull` if you cloned it), then, in that
+folder:
 
 ```bash
-python3 analysis/analyze_class.py ../PSY3200-PredictiveBrain-data/
+python3 analysis/analyze_class.py class_data/
 ```
 
 After the first class this tests the visual effect. After the second class it
@@ -139,8 +140,9 @@ python3 analysis/analyze_class.py data/simulated/
 
 ## Found a bug? Propose a fix
 
-Anyone can propose a change; André or Ishan reviews it before it goes in.
-Click **Fork** on GitHub, make the change in your fork, check that
+Anyone can propose a change; André or Ishan must approve changes to the code
+before they go in (your data uploads need no approval). Make the change on a new
+branch (or in a fork, if you are not in the class), check that
 `python3 -m pytest tests/` still passes, and open a pull request saying what was
 wrong and how you checked the fix.
 
@@ -148,12 +150,17 @@ wrong and how you checked the fix.
 
 - **Adding students:** collect GitHub usernames, then
   `python3 tools/invite_students.py usernames.txt` (one per line) gives each
-  write access to the data repository. `python3 tools/invite_students.py --status`
-  lists who has finished setup (their check-in file in `checkins/`) and who has
-  not accepted yet.
+  write access to this repository. `python3 tools/invite_students.py --status`
+  lists who has finished setup (their check-in file in `class_data/checkins/`)
+  and who has not accepted yet.
+- **Who can change what:** `main` accepts changes only through pull requests and
+  cannot be force-pushed or deleted. Code changes need approval from a code
+  owner (`.github/CODEOWNERS`: André, Ishan); `class_data/` has no code owner, so
+  the task's uploads (a pull request per file) merge at once. André and Ishan
+  can push to `main` directly.
 - **Test runs:** a shortened run such as
-  `python3 mooney_prediction_task_blocks.py --blocks 2` uploads to `demo/` in
-  the data repository, which the class analysis skips. Add `--no-upload` to keep
+  `python3 mooney_prediction_task_blocks.py --blocks 2` uploads to
+  `class_data/demo/`, which the class analysis skips. Add `--no-upload` to keep
   it on your computer only. `--autopilot` runs are never uploaded.
 - Uploads use each student's own GitHub CLI login (`class_repo.py`), so every
   file is credited to the student's account. Concurrent uploads retry.
@@ -166,8 +173,6 @@ wrong and how you checked the fix.
 - `python3 -m pytest tests/` runs the tests: autopilot sessions in both
   modalities, crash safety, sequence checks, uploads against a fake GitHub, and
   the analysis on simulated data.
-- This code repository is public: students pull it and propose fixes as pull
-  requests; only maintainers (André, Ishan) merge them.
 - `CHANGES.md` lists what was fixed and why.
 
 PSY 3200 Predictive Brain | Vanderbilt University | Prof. André Bastos
