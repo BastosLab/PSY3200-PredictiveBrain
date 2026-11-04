@@ -16,9 +16,6 @@ than the other items, whose originals you have not seen.
 
 ![Task design](docs/task_design.png)
 
-**Do not open the `stimuli/` folders before you run the task.** Seeing the
-originals in advance ruins the effect for you.
-
 ## Before the first class (once, about 10 minutes)
 
 1. **GitHub account.** Make one at [github.com](https://github.com) if you do
@@ -45,6 +42,27 @@ originals in advance ruins the effect for you.
    GitHub in your browser, accepts your invitation to this repository, asks
    your name, and uploads a small check-in file. It ends with **All set**.
    If it stops, it says why; fix that and run it again.
+
+### Or: let Claude Code set you up
+
+If you have [Claude Code](https://claude.com/claude-code) (the **Code** tab in
+the Claude desktop app, or the `claude` command in a terminal), it can do
+steps 2–5 for you. Do step 1 yourself (send your GitHub username), open Claude
+Code in your Documents folder, and paste:
+
+> Set me up for PSY 3200: get https://github.com/BastosLab/PSY3200-PredictiveBrain
+> into this folder and follow the setup instructions in its CLAUDE.md.
+
+Claude asks before installing anything. You still type your own password if
+an installer needs it, and you sign in to GitHub in your browser yourself.
+The ordinary Claude chat cannot run programs on your computer, so this needs
+Claude Code.
+
+In class, you can also ask Claude Code (opened in the task folder) to
+**"start my visual session"** (or audio). It starts the task with your saved
+name; you answer the trials yourself. Your data are saved in `my_data/` as you
+go and uploaded to GitHub at the end, and Claude checks the upload afterwards
+(**"upload my data"** does just that step).
 
 ## In class
 
