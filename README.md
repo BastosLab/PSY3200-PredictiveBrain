@@ -46,6 +46,21 @@ originals in advance ruins the effect for you.
    your name, and uploads a small check-in file. It ends with **All set**.
    If it stops, it says why; fix that and run it again.
 
+### Or: let Claude Code set you up
+
+If you have [Claude Code](https://claude.com/claude-code) (the **Code** tab in
+the Claude desktop app, or the `claude` command in a terminal), it can do
+steps 2–5 for you. Do step 1 yourself (send your GitHub username), open Claude
+Code in your Documents folder, and paste:
+
+> Set me up for PSY 3200: get https://github.com/BastosLab/PSY3200-PredictiveBrain
+> into this folder and follow the setup instructions in its CLAUDE.md.
+
+Claude asks before installing anything. You still type your own password if
+an installer needs it, and you sign in to GitHub in your browser yourself.
+The ordinary Claude chat cannot run programs on your computer, so this needs
+Claude Code.
+
 ## In class
 
 Everyone does the **visual** session in the first class and the **audio**
