@@ -146,6 +146,9 @@ python3 analysis/analyze_class.py data/simulated/
 
 ## Problems
 
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for the full list of problems and
+fixes. The most common ones:
+
 - **Mac, "No module named tkinter"** (Homebrew Python): install Python from
   python.org instead, or run `brew install python-tk`.
 - **pygame:** `requirements.txt` installs `pygame-ce`, which provides
