@@ -5,7 +5,7 @@ with each student's own login, so every upload is credited to the student's GitH
 The task code is on `main`, where changes need a code owner's approval. The data are on the
 `class-data` branch of the same repository, which students push to directly (it cannot be
 deleted or force-pushed): class_data/<modality>/ for full sessions, class_data/demo/<modality>/
-for shortened test runs (the class analysis skips them). A file counts as uploaded once the
+for shortened test runs. A file counts as uploaded once the
 branch has it with the same content, so uploading again never duplicates anything.
 """
 import base64

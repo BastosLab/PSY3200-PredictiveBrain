@@ -69,8 +69,8 @@ numbers refer to the original `mooney_prediction_task_blocks.py` (commit `cadeab
 - Automatic upload: at the end of each session the file goes to `class_data/`
   on the `class-data` branch of this repository, with the student's own GitHub
   CLI login (`class_repo.py`); failed uploads are retried by the next session or
-  by `upload_data.py`. `analysis/analyze_class.py --download` fetches everyone's
-  latest data before analysing. `setup_student.py` does the one-time setup;
+  by `upload_data.py`. `download_class_data.py` fetches everyone's latest data.
+  `setup_student.py` does the one-time setup;
   `tools/invite_students.py` adds students and shows who has checked in.
 
 - Command-line options: `--participant/--modality` (skip the menu), `--blocks`,
@@ -78,10 +78,7 @@ numbers refer to the original `mooney_prediction_task_blocks.py` (commit `cadeab
   --speed N` for testing.
 - `tests/`: sequence checks over 200 seeds, full autopilot sessions in both
   modalities (490 rows each), a kill test (every completed trial survives
-  SIGKILL), quitting mid-session, and analysis tests.
-- `analysis/`: per-session and class analyses, plus a simulator that writes
-  fake data in the task's own format with known effects. The class analysis
-  recovers them, and on no-effect data its false-positive rate is 3% (target ≤ 7%).
+  SIGKILL), quitting mid-session, and upload tests.
 - `docs/task_design.png`: one-page design summary.
 
 ## Habits that would have caught these

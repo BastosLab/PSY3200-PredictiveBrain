@@ -78,7 +78,7 @@ The student's name was saved by setup in `~/.psy3200_student.json` (key
 2. Start the full session, skipping the menu:
    `python3 mooney_prediction_task_blocks.py --participant "<saved name>" --modality visual`
    (or `--modality audio`). Use the defaults for everything else: the class
-   analysis only counts full 10-block sessions.
+   uses full 10-block sessions.
    Start it as a background process, because it runs for longer than a normal
    command time limit, and wait for it to exit.
 3. Tell the student what to do in the window: each block opens on a break

@@ -116,33 +116,26 @@ trial_type` (pre / reveal / post), `target_index, stimulus_index` (1-12),
 (yes / no), `recognized` (1 / 0), `reaction_time_ms, timestamp`. The
 reveal (load prior) row has `NA` for the response columns.
 
-## Analyse (after each class)
+## Get the class data (after each class)
 
-Your own session:
-
-```bash
-python3 analysis/analyze_session.py my_data/Visual_Mooney_Experiment_JaneDoe_2026-11-10_14-05-31.csv
-```
-
-The whole class (this first downloads everyone's latest data from GitHub into
-`class_data/`):
+Analysing the data is your job: you decide how to test whether the reveal
+helps. To download everyone's latest sessions from GitHub into `class_data/`:
 
 ```bash
-python3 analysis/analyze_class.py --download
+python3 download_class_data.py
 ```
 
-After the first class this tests the visual effect. After the second class it
-also tests the audio effect and compares audio with visual within each student.
-Because everyone did visual first, that comparison also includes any effect of
-doing the task a second time (for example, already knowing that a reveal is coming).
+Each CSV in `class_data/visual/` and `class_data/audio/` is one session, with the
+columns above. Some things to think about:
 
-Results go to `results/`. To see what the class analysis produces before any
-real data exist:
+- A session that was quit or crashed early has fewer rows than a full one
+  (10 blocks; 490 rows including the reveal rows).
+- `class_data/demo/` holds shortened test runs, not class sessions.
+- `class_data/checkins/` holds the setup check-ins, not data.
+- The download replaces `class_data/` each time, so keep your own analysis
+  files somewhere else.
 
-```bash
-python3 analysis/simulate_class_data.py
-python3 analysis/analyze_class.py data/simulated/
-```
+`pandas`, `scipy` and `matplotlib` are already installed by `setup_student.py`.
 
 ## Problems
 
@@ -178,7 +171,7 @@ wrong and how you checked the fix.
   students' uploads directly. Neither branch can be force-pushed or deleted.
 - **Test runs:** a shortened run such as
   `python3 mooney_prediction_task_blocks.py --blocks 2` uploads to
-  `class_data/demo/` on the `class-data` branch, which the class analysis skips. Add `--no-upload` to keep
+  `class_data/demo/` on the `class-data` branch, apart from class sessions. Add `--no-upload` to keep
   it on your computer only. `--autopilot` runs are never uploaded.
 - Uploads use each student's own GitHub CLI login (`class_repo.py`), so every
   file is credited to the student's account. Concurrent uploads retry.
@@ -189,8 +182,9 @@ wrong and how you checked the fix.
 - `--blocks`, `--target-reps` and `--filler-reps` shorten a session (for demos;
   the class uses the full design).
 - `python3 -m pytest tests/` runs the tests: autopilot sessions in both
-  modalities, crash safety, sequence checks, uploads against a fake GitHub, and
-  the analysis on simulated data.
+  modalities, crash safety, sequence checks, and uploads against a fake GitHub.
 - `CHANGES.md` lists what was fixed and why.
+- The class analysis, the per-session analysis and the data simulator are in the
+  private instructor repository, `BastosLab/PSY3200-PredictiveBrain-instructor`.
 
 PSY 3200 Predictive Brain | Vanderbilt University | Prof. André Bastos
