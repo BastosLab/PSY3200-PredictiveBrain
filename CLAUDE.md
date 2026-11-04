@@ -1,30 +1,25 @@
-# Instructions for Claude: setting up a PSY 3200 student
+# Instructions for Claude: helping a PSY 3200 student
 
 This repository is the Mooney prediction task for PSY 3200 (The Predictive
-Brain, Vanderbilt). If a student asks you to set them up, follow the steps
-below on their computer. The goal is the same as the README's "Before the first
-class" section: `setup_student.py` finishes with **All set**.
+Brain, Vanderbilt). A student may ask you to **set them up**, to **run a
+session** (visual in the first class, audio in the second), or to **upload
+their data**. Each is described below.
 
 Talk to the student in plain language. Most have never used a terminal. Before
-each step, say in one sentence what you are about to do.
+each step, say in one sentence what you are about to do. Ask before installing
+anything, and say what it is.
 
-## Rules (always)
-
-- **Never open, list, display, describe or copy anything inside `stimuli/`.**
-  Seeing an original image or hearing a clear sentence before the task ruins
-  the experiment for that student. You do not need those files for setup.
-- **Never run the experiment for the student, and never create, edit or delete
-  files in `my_data/` or `class_data/`.** The task records the student's own
-  responses. If they ask you to do it for them, explain that the data must
-  be theirs.
-- Do not change the task's code. If something fails, report the error message
-  and suggest the fix below. Do not work around it by editing files.
-- Ask before installing anything, and say what it is.
-
-## Steps
+**Do not change the task's code.** If something fails, report the error
+message and use the fixes below. Do not work around a failure by editing
+files.
 
 Work out the operating system first (macOS or Windows). On Windows, use `py`
-wherever these steps say `python3`.
+wherever these instructions say `python3`.
+
+## 1. One-time setup
+
+The goal is the same as the README's "Before the first class" section:
+`setup_student.py` finishes with **All set**.
 
 1. **Get the task folder.** If you are not already inside a copy of this
    repository, download it into the student's Documents folder:
@@ -71,7 +66,49 @@ wherever these steps say `python3`.
      python.org Python (go back to step 2).
    - tkinter or sound failures: go back to step 2 (macOS: python.org Python).
 
-7. **Finish.** When the output ends with **All set**, tell the student it
-   worked, and that in class they open a terminal in this folder and run
-   `python3 mooney_prediction_task_blocks.py` (Windows: `py ...`) themselves,
-   following the instructions in the README. Bring headphones for the audio class.
+7. When the output ends with **All set**, tell the student it worked.
+
+## 2. Running a session
+
+The student's name was saved by setup in `~/.psy3200_student.json` (key
+`name`). If that file is missing, do the setup first.
+
+1. Ask which session: **visual** (first class, about 18 minutes) or **audio**
+   (second class, about 36 minutes; headphones on).
+2. Start the full session, skipping the menu:
+   `python3 mooney_prediction_task_blocks.py --participant "<saved name>" --modality visual`
+   (or `--modality audio`). Use the defaults for everything else: the class
+   analysis only counts full 10-block sessions.
+   Start it as a background process, because it runs for longer than a normal
+   command time limit, and wait for it to exit.
+3. Tell the student what to do in the window: each block opens on a break
+   screen ("Block 3 of 10"); press **SPACE** to start it. **→ = yes**,
+   **← = no**. **ESC** quits (it asks first). The student answers every trial
+   themselves; the class results are about their perception.
+4. **Data are saved and uploaded automatically.** Every trial is written the
+   moment it ends to `my_data/Visual_Mooney_Experiment_<Name>_<date>_<time>.csv`
+   (audio: `Audio_SineWaveSpeech_Experiment_...`). At the end the program
+   uploads the file to the `class-data` branch of the class repository under
+   the student's GitHub login. The last screen says *Uploaded to GitHub*, or
+   *Not uploaded* with the reason. Tell the student to wait for that screen
+   before closing the window.
+5. After the program exits, make sure the upload happened (section 3).
+
+`--autopilot` (random answers, for testing the program) and runs with fewer
+blocks are never uploaded as class data; do not use them for a real session.
+
+## 3. Uploading data
+
+Run `python3 upload_data.py`. It uploads every session file in `my_data/` that
+is not on GitHub yet, and says "Nothing to upload" if all are already there.
+Run it after every session, and whenever an upload failed.
+
+If it prints "NOT uploaded":
+- No internet: wait until the student is online and run it again. The file is
+  safe in `my_data/`.
+- GitHub sign-in problems: check `gh auth status` and, if needed, have the
+  student sign in again (section 1, step 4), then rerun.
+- No upload access: run `python3 setup_student.py` again; if it says they have
+  not been invited, the student sends their GitHub username to the instructor.
+
+Uploaded files are listed in `my_data/.uploaded`.

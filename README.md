@@ -61,6 +61,12 @@ an installer needs it, and you sign in to GitHub in your browser yourself.
 The ordinary Claude chat cannot run programs on your computer, so this needs
 Claude Code.
 
+In class, you can also ask Claude Code (opened in the task folder) to
+**"start my visual session"** (or audio). It starts the task with your saved
+name; you answer the trials yourself. Your data are saved in `my_data/` as you
+go and uploaded to GitHub at the end, and Claude checks the upload afterwards
+(**"upload my data"** does just that step).
+
 ## In class
 
 Everyone does the **visual** session in the first class and the **audio**
