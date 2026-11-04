@@ -2,8 +2,8 @@
 
 This repository is the Mooney prediction task for PSY 3200 (The Predictive
 Brain, Vanderbilt). A student may ask you to **set them up**, to **run a
-session** (visual in the first class, audio in the second), or to **upload
-their data**. Each is described below.
+session** (visual in the first class, audio in the second), to **explore the
+stats lab**, or to **upload their data**. Each is described below.
 
 Talk to the student in plain language. Most have never used a terminal. Before
 each step, say in one sentence what you are about to do. Ask before installing
@@ -92,12 +92,26 @@ The student's name was saved by setup in `~/.psy3200_student.json` (key
    the student's GitHub login. The last screen says *Uploaded to GitHub*, or
    *Not uploaded* with the reason. Tell the student to wait for that screen
    before closing the window.
-5. After the program exits, make sure the upload happened (section 3).
+5. After the program exits, make sure the upload happened (section 4).
 
 `--autopilot` (random answers, for testing the program) and runs with fewer
 blocks are never uploaded as class data; do not use them for a real session.
 
-## 3. Uploading data
+## 3. Stats lab (learning the basics)
+
+`stats_lab/stats_lab.py` simulates made-up reaction-time studies so students can
+see what the mean, SD, standard error, 95% confidence interval, t and p do.
+`stats_lab/STATS_PRIMER.pdf` explains the ideas using its output. If a student
+asks about these ideas or about the stats lab:
+
+- Run the command that fits (`sample`, `repeat`, `coverage`, `two`, `many`;
+  see `python3 stats_lab/stats_lab.py -h`), changing `--n`, `--sd`, `--diff`
+  or `--seed` to answer their question.
+- Show the printed numbers, open the saved figure in `stats_lab/figures/` and
+  explain both in plain language, linking to the matching part of the primer.
+- Encourage them to predict what will happen before each run, then compare.
+
+## 4. Uploading data
 
 Run `python3 upload_data.py`. It uploads every session file in `my_data/` that
 is not on GitHub yet, and says "Nothing to upload" if all are already there.

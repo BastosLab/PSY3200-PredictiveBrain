@@ -137,6 +137,27 @@ columns above. Some things to think about:
 
 `pandas`, `scipy` and `matplotlib` are already installed by `setup_student.py`.
 
+## Stats lab: learn the basics by simulation
+
+Before you analyse the class data, read [`stats_lab/STATS_PRIMER.pdf`](stats_lab/STATS_PRIMER.pdf)
+(about 20 minutes). It builds from the mean, standard deviation, standard error
+and 95% confidence interval, for one group and for two, to testing a null
+hypothesis with t and p. Every example in it comes from a small simulation you
+can run and change yourself:
+
+```bash
+python3 stats_lab/stats_lab.py sample      # one study: mean, SD, SE, 95% CI
+python3 stats_lab/stats_lab.py repeat      # repeat a study 10,000 times: where SE comes from
+python3 stats_lab/stats_lab.py coverage    # how often does a 95% CI contain the truth?
+python3 stats_lab/stats_lab.py two         # two groups: difference, its CI, t and p
+python3 stats_lab/stats_lab.py many        # 1,000 studies with no real difference: false positives
+```
+
+Options: `--n` (people per group), `--mean`, `--sd`, `--diff` (true difference
+between groups) and `--seed` (repeat a run exactly). Figures are saved in
+`stats_lab/figures/`. In Claude Code you can just ask, for example: *"Run the
+stats lab two-group simulation with 50 people per group and explain the output."*
+
 ## Problems
 
 - **Mac, "No module named tkinter"** (Homebrew Python): install Python from
