@@ -16,9 +16,6 @@ than the other items, whose originals you have not seen.
 
 ![Task design](docs/task_design.png)
 
-**Do not open the `stimuli/` folders before you run the task.** Seeing the
-originals in advance ruins the effect for you.
-
 ## Before the first class (once, about 10 minutes)
 
 1. **GitHub account.** Make one at [github.com](https://github.com) if you do
