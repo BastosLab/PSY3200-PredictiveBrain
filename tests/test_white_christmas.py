@@ -1,12 +1,12 @@
-"""The White Noise analysis reads the 2026 spreadsheets and matches Ishan's original tally."""
+"""The White Christmas analysis reads the 2026 spreadsheets and matches Ishan's original tally."""
 import datetime as dt
 import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'white_noise'))
-import analyze_white_noise as wn  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'white-christmas-analysis'))
+import analyze_white_christmas as wn  # noqa: E402
 
 ISHAN_2026 = {'P1': (6, 0, 0), 'P2': (0, 2, 8), 'P3': (4, 3, 1), 'P4': (0, 5, 0), 'P5': (12, 14, 16)}
 

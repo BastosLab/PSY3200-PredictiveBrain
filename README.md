@@ -139,8 +139,8 @@ columns above. Some things to think about:
 
 ## White Christmas in Noise
 
-The class's White Noise experiment (2025 and 2026 data, the analysis and the results so
-far) is in [`white_noise/`](white_noise/README.md).
+The class's White Christmas in Noise experiment (2025 and 2026 data, the analysis and the results so
+far) is in [`white-christmas-analysis/`](white-christmas-analysis/README.md).
 
 ## Problems
 

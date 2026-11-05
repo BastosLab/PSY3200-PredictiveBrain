@@ -7,8 +7,8 @@ bodily feeling they noticed. The experimenter logged each one as Auditory (code 
 Visual (code 2) or Bodily (code 3). This script counts those events, turns them into
 events per minute, and compares the 2025 and 2026 classes.
 
-    python white_noise/analyze_white_noise.py              # figure + summary table
-    python white_noise/analyze_white_noise.py --out my.png
+    python white-christmas-analysis/analyze_white_christmas.py              # figure + summary table
+    python white-christmas-analysis/analyze_white_christmas.py --out my.png
 
 sessions.csv lists every participant. 2025 rows hold Ishan's counts (there are no
 raw 2025 files). 2026 rows point to a spreadsheet in spreadsheets/2026/; the counts are
@@ -168,7 +168,7 @@ def plot(sessions, summary, out_path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--out', default=str(HERE / 'white_noise_results.png'))
+    ap.add_argument('--out', default=str(HERE / 'white_christmas_results.png'))
     args = ap.parse_args()
     sessions = load_sessions()
     summary = summarise(sessions)

@@ -16,20 +16,20 @@ At the end, the experimenter asks: did you hear "White Christmas"? Did you fall 
 - `sessions.csv`: one row per participant: class year, label, session length in minutes,
   and either the counts (2025) or the spreadsheet they come from (2026).
 - `spreadsheets/2026/`: the 2026 class's recording sheets, as handed in.
-- `analyze_white_noise.py`: counts the events, converts them to events per minute,
-  and draws `white_noise_results.png`.
+- `analyze_white_christmas.py`: counts the events, converts them to events per minute,
+  and draws `white_christmas_results.png`.
 
 ## Run it
 
 ```bash
-python3 white_noise/analyze_white_noise.py
+python3 white-christmas-analysis/analyze_white_christmas.py
 ```
 
 It prints the mean ± SE for each category and class, and saves the figure.
 
 ## Results so far
 
-![White Noise results](white_noise_results.png)
+![White Christmas results](white_christmas_results.png)
 
 | Events per minute (mean ± SE) | 2025 (n = 8) | 2026 (n = 5) |
 |---|---|---|
