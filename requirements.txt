@@ -6,5 +6,6 @@ pygame-ce
 pandas
 scipy
 matplotlib
+openpyxl
 # tests
 pytest
