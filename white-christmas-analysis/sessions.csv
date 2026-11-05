@@ -7,8 +7,8 @@ year,participant,file,block,duration_min,auditory,visual,bodily,white_christmas,
 2025,P6,,,12.0,7,5,3,,,
 2025,P7,,,9.0,4,2,1,,,
 2025,P8,,,14.5,8,8,3,,,
-2026,P1,1PSY3200WhiteNoiseAmber.xltx,0,14.0,,,,No,No,duration estimated
-2026,P2,Je-ho PSY3200 White Noise Experiment Spreadsheet2.xlsx,0,15.0,,,,No,No,duration estimated
-2026,P3,1PSY3200WhiteNoiseJoon.xlsx,0,16.0,,,,No,No,duration estimated
-2026,P4,Siyu Chen.xlsx,0,16.3,,,,Yes (chorus),,duration estimated; the file has a second Time/Type/Code block (2 events) with its own White Christmas answer (No) that is not counted
-2026,P5,PSY3200 White Noise Experiment Spreadsheet2_Sophie Data.xlsx,0,17.0,,,,No,No,duration estimated
+2026,P1,P1.xlsx,0,14.0,,,,No,No,duration estimated
+2026,P2,P2.xlsx,0,15.0,,,,No,No,duration estimated
+2026,P3,P3.xlsx,0,16.0,,,,No,No,duration estimated
+2026,P4,P4.xlsx,0,16.3,,,,Yes (chorus),,duration estimated; the file has a second Time/Type/Code block (2 events) with its own White Christmas answer (No) that is not counted
+2026,P5,P5.xlsx,0,17.0,,,,No,No,duration estimated

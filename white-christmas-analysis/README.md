@@ -15,7 +15,7 @@ At the end, the experimenter asks: did you hear "White Christmas"? Did you fall 
 
 - `sessions.csv`: one row per participant: class year, label, session length in minutes,
   and either the counts (2025) or the spreadsheet they come from (2026).
-- `spreadsheets/2026/`: the 2026 class's recording sheets, as handed in.
+- `spreadsheets/2026/`: the 2026 class's recording sheets, renamed P1 to P5 with names removed.
 - `analyze_white_christmas.py`: counts the events, converts them to events per minute,
   and draws `white_christmas_results.png`.
 
@@ -47,7 +47,7 @@ as the class mean, across all three types.
 
 - The 2025 counts come from Ishan's tally; the 2025 spreadsheets are not here.
 - Session lengths are estimates, so events per minute are approximate.
-- `Siyu Chen.xlsx` has a second Time / Type / Code block (two events, its own
+- `P4.xlsx` has a second Time / Type / Code block (two events, its own
   "White Christmas? No"). It is not counted; see the note in `sessions.csv`.
 
 Original analysis by Ishan Mahajan
