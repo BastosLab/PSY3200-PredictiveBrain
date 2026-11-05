@@ -10,8 +10,8 @@ each step, say in one sentence what you are about to do. Ask before installing
 anything, and say what it is.
 
 **Do not change the task's code.** If something fails, report the error
-message and use the fixes below. Do not work around a failure by editing
-files.
+message and use the fixes below and in `TROUBLESHOOTING.md`. Do not work
+around a failure by editing files.
 
 Work out the operating system first (macOS or Windows). On Windows, use `py`
 wherever these instructions say `python3`.
