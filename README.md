@@ -137,6 +137,11 @@ columns above. Some things to think about:
 
 `pandas`, `scipy` and `matplotlib` are already installed by `setup_student.py`.
 
+## White Christmas in Noise
+
+The class's White Noise experiment (2025 and 2026 data, the analysis and the results so
+far) is in [`white_noise/`](white_noise/README.md).
+
 ## Problems
 
 - **Mac, "No module named tkinter"** (Homebrew Python): install Python from
