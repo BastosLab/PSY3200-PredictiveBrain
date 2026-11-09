@@ -164,28 +164,13 @@ def main():
     ax.text(6.35, 1.32, "←  NO            YES  →", ha="center", fontsize=11, color=INK, fontweight="bold")
     ax.text(6.35, 1.05, "answer any time", ha="center", fontsize=9, color=MUTED)
 
-    # 4. conditions + analysis
-    section(ax, 8.6, 4.75, "4  What we compare")
-    for k, (c, lab, desc) in enumerate([
-            (TARGET, "target", "this block's revealed item"),
-            (FILLER_NEW, "filler_new", "filler whose original was never shown yet (the control)"),
-            (FILLER_OLD, "filler_old", "filler that was the target of an earlier block (block 2 on)")]):
-        yy = 4.15 - k * 0.42
-        box(ax, 8.6, yy, 0.32, 0.26, c, r=0.04)
-        ax.text(9.05, yy + 0.13, lab, fontsize=10.5, color=INK, va="center", fontweight="bold")
-        ax.text(10.3, yy + 0.13, desc, fontsize=10, color=INK2, va="center")
-    ax.text(8.6, 2.6, "Disambiguation effect  =  (target post − pre)  −  (filler_new post − pre)",
-            fontsize=11.5, color=INK, fontweight="bold")
-    ax.text(8.6, 2.28, "Prediction: knowing the original (a high-level prior) makes the degraded version "
-            "recognisable,\nso target recognition rises more than filler_new, which only gets repetition.",
-            fontsize=10, color=INK2, va="top")
-
-    # 5. run time
-    ax.text(8.6, 1.62, "Estimated time per session (full design: 10 blocks of 49 trials)", fontsize=11,
-            color=INK, fontweight="bold")
-    ax.plot([8.6, 15.6], [1.5, 1.5], color=RULE, lw=1)
+    # 4. run time
+    section(ax, 8.6, 4.75, "4  How long a session takes")
+    ax.text(8.6, 4.3, "Estimated time per session (full design: 10 blocks of 49 trials)", fontsize=11,
+            color=INK2)
+    ax.plot([8.6, 15.6], [4.18, 4.18], color=RULE, lw=1)
     for k, (name, m, lo, hi) in enumerate(runtime_table()):
-        yy = 1.18 - k * 0.32
+        yy = 3.8 - k * 0.42
         ax.text(8.6, yy, f"Class {k + 1}: {name.lower()} session", fontsize=10.5, color=INK2)
         ax.text(11.2, yy, f"~{m:.0f} min", fontsize=10.5, color=INK, fontweight="bold")
         ax.text(12.2, yy, f"(range {lo:.0f}-{hi:.0f})", fontsize=10, color=INK2)
