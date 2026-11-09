@@ -1,0 +1,5 @@
+participant_id,modality,seed,n_blocks,block,trial_number,trial_type,target_index,stimulus_index,stimulus_file,condition,response,recognized,reaction_time_ms,timestamp
+BelindaChen,visual,1282038114,10,1,1,pre,7,2,img02,filler_new,no,0,954.28,2026-11-09T23:29:33.322278
+BelindaChen,visual,1282038114,10,1,2,pre,7,7,img07,target,no,0,167.78,2026-11-09T23:29:33.511888
+BelindaChen,visual,1282038114,10,1,3,pre,7,7,img07,target,no,0,112.57,2026-11-09T23:29:33.645810
+BelindaChen,visual,1282038114,10,1,4,pre,7,4,img04,filler_new,no,0,157.34,2026-11-09T23:29:33.824469
