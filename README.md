@@ -137,6 +137,10 @@ columns above. Some things to think about:
 
 `pandas`, `scipy` and `matplotlib` are already installed by `setup_student.py`.
 
+To see the whole class's results in a window, see the
+[class results app](class-results-app/README.md):
+`python3 class-results-app/class_results_app.py`.
+
 ## White Christmas in Noise
 
 The class's White Christmas in Noise experiment (2025 and 2026 data, the analysis and the results so
